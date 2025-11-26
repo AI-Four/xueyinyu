@@ -1,0 +1,14 @@
+[
+  {
+    "id": 1,
+    "audio": "audio/wipe_the_table.mp3",
+    "answer": "wipe the table",
+    "options": ["wipe the table", "wash your hands", "touch the phone"]
+  },
+  {
+    "id": 2,
+    "audio": "audio/touch_the_phone.mp3",
+    "answer": "touch the phone",
+    "options": ["touch the phone", "wipe the window", "brush your teeth"]
+  }
+]
