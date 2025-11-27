@@ -1,4 +1,4 @@
-import { _decorator, Component, Label, resources, JsonAsset } from 'cc';
+import { _decorator, Component, Label, resources, JsonAsset, AudioSource, AudioClip } from 'cc';
 import { OptionButton } from './OptionButton';
 const { ccclass, property } = _decorator;
 
@@ -15,11 +15,26 @@ export class GameManager extends Component {
   @property(Label)
   tipsLabel: Label | null = null;
 
+  @property(Label)
+  scoreLabel: Label | null = null;
+
   @property(OptionButton)
   optionButtons: OptionButton[] = [];
 
+  @property(AudioSource)
+  audioSource: AudioSource | null = null;
+
   private _questions: Question[] = [];
   private _currentIndex = 0;
+
+
+  private _score = 0;
+
+  updateScoreLabel() {
+    if (this.scoreLabel) {
+      this.scoreLabel.string = `Score: ${this._score}`;
+    }
+  }
 
   start() {
     this.loadQuestions();
@@ -56,15 +71,22 @@ export class GameManager extends Component {
   onSelectOption(value: string) {
     const q = this._questions[this._currentIndex];
     const correct = value === q.answer;
+
+    if (correct) {
+      this._score += 10;
+      this.updateScoreLabel();
+    }
+
     if (this.tipsLabel) {
-      this.tipsLabel.string = correct ? '✅ 回答正确！' : '❌ 再试一次';
+      this.tipsLabel.string = correct ? '✅ 回答正确！' : '❌ 再听一遍试试';
     }
 
     if (correct) {
-      // 简单延迟切下一题
       this.scheduleOnce(() => {
         this.nextQuestion();
       }, 1);
+    } else {
+      this.playCurrentAudio();
     }
   }
 
@@ -79,10 +101,22 @@ export class GameManager extends Component {
     this.showQuestion();
   }
 
+  playCurrentAudio() {
+    const q = this._questions[this._currentIndex];
+    if (!q || !this.audioSource) return;
+
+    const path = q.audio; // 如 "audio/wipe_the_table"
+    resources.load(path, AudioClip, (err, clip) => {
+      if (err) {
+        console.error(err);
+        return;
+      }
+      this.audioSource!.clip = clip!;
+      this.audioSource!.play();
+    });
+  }
+
   onClickPlayAudio() {
-    // TODO: Day2 接音频
-    if (this.tipsLabel) {
-      this.tipsLabel.string = '（这里以后会播放英语音频）';
-    }
+    this.playCurrentAudio();
   }
 }
